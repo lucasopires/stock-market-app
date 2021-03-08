@@ -1,8 +1,5 @@
 package ca.stock360.persistence.domains;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
@@ -12,7 +9,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "stock_fund_transaction")
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+//@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class StockFundTransaction implements Serializable {
 
     @Id

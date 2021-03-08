@@ -1,9 +1,9 @@
 package ca.stock360.persistence.domains;
 
 public enum StockTransactionDirection {
-    BUY("B"),SELL("S");
+    BUY("B"), SELL("S");
 
-    private String code;
+    private final String code;
 
     StockTransactionDirection(String code) {
         this.code = code;

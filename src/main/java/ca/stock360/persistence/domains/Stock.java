@@ -18,7 +18,14 @@ public class Stock implements Serializable {
     @Column(name = "ticker")
     private String ticker;
 
-    public long getId() {
+    public Stock() {
+    }
+
+    public Stock(@NotNull String ticker) {
+        this.ticker = ticker;
+    }
+
+    public Long getId() {
         return id;
     }
 
@@ -34,17 +41,24 @@ public class Stock implements Serializable {
         this.ticker = ticker;
     }
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Stock stock = (Stock) o;
-        return id.equals(stock.id) && ticker.equals(stock.ticker);
+        return ticker.equals(stock.ticker);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, ticker);
+        return Objects.hash(ticker);
+    }
+
+    @Override
+    public String toString() {
+        return "Stock{" +
+                "id=" + id +
+                ", ticker='" + ticker + '\'' +
+                '}';
     }
 }

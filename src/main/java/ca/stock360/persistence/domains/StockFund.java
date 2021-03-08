@@ -22,6 +22,13 @@ public class StockFund implements Serializable {
     @Column(name = "name")
     private String name;
 
+    public StockFund() {
+    }
+
+    public StockFund(@NotNull String ticker, @NotNull String name) {
+        this.ticker = ticker;
+        this.name = name;
+    }
 
     public Long getId() {
         return id;
@@ -52,12 +59,12 @@ public class StockFund implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         StockFund stockFund = (StockFund) o;
-        return id == stockFund.id;
+        return ticker.equals(stockFund.ticker);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(ticker);
     }
 
     @Override

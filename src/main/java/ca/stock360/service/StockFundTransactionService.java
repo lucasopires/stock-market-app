@@ -1,10 +1,12 @@
 package ca.stock360.service;
 
+import ca.stock360.persistence.StockFundRepository;
 import ca.stock360.persistence.StockFundTransactionRepository;
+import ca.stock360.persistence.StockRepository;
 import ca.stock360.persistence.domains.Stock;
 import ca.stock360.persistence.domains.StockFund;
 import ca.stock360.persistence.domains.StockFundTransaction;
-import ca.stock360.persistence.domains.StockTransactionDirection;
+import ca.stock360.service.wrapper.CsvRowWrapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -15,32 +17,32 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class StockFundTransactionService {
 
-    private final StockFundTransactionRepository repository;
+    private final StockFundTransactionRepository stockFundTransactinorepository;
+    private final StockFundRepository stockFundRepository;
+    private final StockRepository stockRepository;
 
-    public StockFundTransactionService(StockFundTransactionRepository repository) {
-        this.repository = repository;
-    }
-
-    public static LocalDate converCsvDateToInstant(String date) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d-MMM-yy");
-        return LocalDate.parse(date, formatter);
+    public StockFundTransactionService(
+            StockFundTransactionRepository stockFundTransactinorepository,
+            StockFundRepository stockFundRepository, StockRepository stockRepository) {
+        this.stockFundTransactinorepository = stockFundTransactinorepository;
+        this.stockFundRepository = stockFundRepository;
+        this.stockRepository = stockRepository;
     }
 
     @Transactional(readOnly = true)
     public Page<StockFundTransaction> findAllPageble(Pageable pageable) {
-        return repository.findAll(pageable);
+        return stockFundTransactinorepository.findAll(pageable);
     }
 
     @Transactional(readOnly = true)
     public List<StockFundTransaction> findAll() {
-        return repository.findAll();
+        return stockFundTransactinorepository.findAll();
     }
 
     @Transactional
@@ -48,25 +50,32 @@ public class StockFundTransactionService {
         try (BufferedReader br = new BufferedReader(new FileReader(getTradesCsvFile()))) {
             String line;
             while ((line = br.readLine()) != null) {
-                String[] values = line.split(",");
+                CsvRowWrapper rowWrapper = new CsvRowWrapper(line);
 
-                Stock stock = new Stock();
-                stock.setTicker(values[0]);
+                Stock stock = stockRepository
+                        .findOneByTicker(rowWrapper.getStockTicker())
+                        .orElse(
+                                stockRepository.saveAndFlush(new Stock(rowWrapper.getStockTicker())));
 
-                StockFund stockFund = new StockFund();
-                stockFund.setTicker(values[5]);
-                stockFund.setName(values[5]);
+                StockFund stockFund = stockFundRepository
+                        .findOneByTicker(rowWrapper.getStockTicker())
+                        .orElse(
+                                stockFundRepository.saveAndFlush(
+                                        new StockFund(
+                                                rowWrapper.getFundTicker(),
+                                                rowWrapper.getFundTicker())));
 
                 StockFundTransaction fundTransaction = new StockFundTransaction();
                 fundTransaction.setStock(stock);
                 fundTransaction.setFund(stockFund);
-                fundTransaction.setFundWeight(Double.valueOf(values[4]));
-                fundTransaction.setDate(converCsvDateToInstant(values[1]));
-                fundTransaction.setDirection(StockTransactionDirection.valueOf(values[2]));
-                fundTransaction.setShares(Double.valueOf(values[3]));
+                fundTransaction.setFundWeight(rowWrapper.getTransactionFundWeight());
+
+                fundTransaction.setDate(rowWrapper.getTransactionDate());
+                fundTransaction.setDirection(rowWrapper.getTransactionDirection());
+                fundTransaction.setShares(rowWrapper.getNumberOfShares());
                 fundTransaction.setCreatedAt(Instant.now());
 
-                repository.save(fundTransaction);
+                stockFundTransactinorepository.save(fundTransaction);
             }
         }
     }
@@ -74,7 +83,6 @@ public class StockFundTransactionService {
     private File getTradesCsvFile() {
         String resourceName = "trades_test.csv";
         ClassLoader classLoader = getClass().getClassLoader();
-        File file = new File(classLoader.getResource(resourceName).getFile());
-        return file;
+        return new File(Objects.requireNonNull(classLoader.getResource(resourceName)).getFile());
     }
 }
