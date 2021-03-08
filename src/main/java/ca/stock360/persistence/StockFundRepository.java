@@ -7,6 +7,6 @@ import java.util.Optional;
 
 public interface StockFundRepository extends JpaRepository<StockFund, Long> {
 
-    Optional<StockFund> findOneByTicker(String ticker);
+    StockFund findOneByTicker(String ticker);
 
 }

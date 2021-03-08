@@ -52,18 +52,17 @@ public class StockFundTransactionService {
             while ((line = br.readLine()) != null) {
                 CsvRowWrapper rowWrapper = new CsvRowWrapper(line);
 
-                Stock stock = stockRepository
-                        .findOneByTicker(rowWrapper.getStockTicker())
-                        .orElse(
-                                stockRepository.saveAndFlush(new Stock(rowWrapper.getStockTicker())));
+                Stock stock = stockRepository.findOneByTicker(rowWrapper.getStockTicker());
+                if (stock == null)
+                    stock = stockRepository.save(new Stock(rowWrapper.getStockTicker()));
 
-                StockFund stockFund = stockFundRepository
-                        .findOneByTicker(rowWrapper.getStockTicker())
-                        .orElse(
-                                stockFundRepository.saveAndFlush(
-                                        new StockFund(
-                                                rowWrapper.getFundTicker(),
-                                                rowWrapper.getFundTicker())));
+                StockFund stockFund = stockFundRepository.findOneByTicker(rowWrapper.getFundTicker());
+                if (stockFund == null)
+                    stockFund = stockFundRepository.save(
+                            new StockFund(
+                                    rowWrapper.getFundTicker(),
+                                    rowWrapper.getFundTicker()));
+
 
                 StockFundTransaction fundTransaction = new StockFundTransaction();
                 fundTransaction.setStock(stock);
