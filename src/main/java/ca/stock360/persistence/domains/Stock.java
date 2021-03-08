@@ -6,8 +6,8 @@ import java.io.Serializable;
 import java.util.Objects;
 
 @Entity
-@Table(name = "stock_fund")
-public class StockFund implements Serializable {
+@Table(name = "stock")
+public class Stock implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,12 +18,7 @@ public class StockFund implements Serializable {
     @Column(name = "ticker")
     private String ticker;
 
-    @NotNull
-    @Column(name = "name")
-    private String name;
-
-
-    public Long getId() {
+    public long getId() {
         return id;
     }
 
@@ -39,33 +34,17 @@ public class StockFund implements Serializable {
         this.ticker = ticker;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        StockFund stockFund = (StockFund) o;
-        return id == stockFund.id;
+        Stock stock = (Stock) o;
+        return id.equals(stock.id) && ticker.equals(stock.ticker);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
-    }
-
-    @Override
-    public String toString() {
-        return "StockFund{" +
-                "id=" + id +
-                ", ticker='" + ticker + '\'' +
-                ", name='" + name + '\'' +
-                '}';
+        return Objects.hash(id, ticker);
     }
 }

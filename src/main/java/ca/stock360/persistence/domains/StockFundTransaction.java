@@ -7,12 +7,13 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Objects;
 
 @Entity
 @Table(name = "stock_fund_transaction")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-public class StockTransaction implements Serializable {
+public class StockFundTransaction implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,6 +29,10 @@ public class StockTransaction implements Serializable {
     private Double fundWeight;
 
     @NotNull
+    @ManyToOne
+    private Stock stock;
+
+    @NotNull
     @Column(name = "shares")
     private Double shares;
 
@@ -37,7 +42,7 @@ public class StockTransaction implements Serializable {
 
     @NotNull
     @Column(name = "date", nullable = false)
-    private Instant date;
+    private LocalDate date;
 
     @NotNull
     @Column(name = "created_at", nullable = false)
@@ -83,11 +88,11 @@ public class StockTransaction implements Serializable {
         this.direction = direction;
     }
 
-    public Instant getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(Instant date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 
@@ -99,11 +104,19 @@ public class StockTransaction implements Serializable {
         this.createdAt = createdAt;
     }
 
+    public Stock getStock() {
+        return stock;
+    }
+
+    public void setStock(Stock stock) {
+        this.stock = stock;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        StockTransaction that = (StockTransaction) o;
+        StockFundTransaction that = (StockFundTransaction) o;
         return id.equals(that.id);
     }
 
@@ -114,10 +127,11 @@ public class StockTransaction implements Serializable {
 
     @Override
     public String toString() {
-        return "StockTransaction{" +
+        return "StockFundTransaction{" +
                 "id=" + id +
                 ", fund=" + fund +
                 ", fundWeight=" + fundWeight +
+                ", stock=" + stock +
                 ", shares=" + shares +
                 ", direction=" + direction +
                 ", date=" + date +
